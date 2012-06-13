@@ -51,6 +51,8 @@ def decompress(val):
     cdef Py_ssize_t slen, dlen
     if not isinstance(val, str):
         raise ValueError
+    if not val:
+       return ""
     PyString_AsStringAndSize(val, &src, &slen)
     if qlz_size_compressed(src) != slen:
         raise ValueError('compressed length not match %d!=%d' % (slen, qlz_size_compressed(src)))
