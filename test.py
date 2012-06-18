@@ -15,6 +15,11 @@ class Test(unittest.TestCase):
         text = randstr(10000)
         assert text == quicklz.decompress(quicklz.compress(text))
 
+    def test_empty_string(self):
+        text = ''
+        assert quicklz.compress(text) == ''
+        assert text == quicklz.decompress(quicklz.compress(text))
+
     def test_try_compress(self):
         cases = [
             ('hello', False, 'short string'),

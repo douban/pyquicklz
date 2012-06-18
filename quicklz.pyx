@@ -38,12 +38,16 @@ def compress(val):
     cdef int csize
     if not isinstance(val, str):
         raise ValueError
+    if not val:
+        return ""
     PyString_AsStringAndSize(val, &src, &vlen)
     wbuf = <char *>malloc(QLZ_SCRATCH_COMPRESS)
     dst = <char *>malloc(vlen + 400)
     csize = qlz_compress(src, dst, vlen, wbuf)
     free(wbuf)
-    return PyString_FromStringAndSize(dst, csize)
+    val = PyString_FromStringAndSize(dst, csize)
+    free(dst)
+    return val
 
 def decompress(val):
     cdef char wbuf[QLZ_SCRATCH_DECOMPRESS]
@@ -56,10 +60,12 @@ def decompress(val):
     PyString_AsStringAndSize(val, &src, &slen)
     if qlz_size_compressed(src) != slen:
         raise ValueError('compressed length not match %d!=%d' % (slen, qlz_size_compressed(src)))
-    
+        
     dst = <char*> malloc(qlz_size_decompressed(src))
     dlen = qlz_decompress(src, dst, wbuf)
-    return PyString_FromStringAndSize(dst, dlen);
+    val = PyString_FromStringAndSize(dst, dlen);
+    free(dst)
+    return val
 
 TRY_LENGTH = 1024 * 10
 

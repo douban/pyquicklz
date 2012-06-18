@@ -10,6 +10,6 @@ setup(
         ext_modules = [
             Extension('quicklz', ['quicklz.pyx','src/quicklz.c']),
             ],
-        py_modules=['quicklz'],
+#        py_modules=['quicklz'],
         test_suite="test",
 )
