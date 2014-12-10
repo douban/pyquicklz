@@ -33,7 +33,9 @@ cdef extern from "src/quicklz.h":
     size_t qlz_compress(void *source, char *destination, size_t size, char *scratch_compress)
 
 def compress(val):
-    cdef char *wbuf, *src, *dst
+    cdef char *wbuf
+    cdef char *src
+    cdef char *dst
     cdef Py_ssize_t vlen
     cdef int csize
     if not isinstance(val, str):
@@ -51,7 +53,8 @@ def compress(val):
 
 def decompress(val):
     cdef char wbuf[QLZ_SCRATCH_DECOMPRESS]
-    cdef char *src, *dst
+    cdef char *src
+    cdef char *dst
     cdef Py_ssize_t slen, dlen
     if not isinstance(val, str):
         raise ValueError
