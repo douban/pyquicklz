@@ -1,0 +1,10 @@
+- job:
+    name: columnar
+    scm:
+      - git:
+          branches:
+            - master
+          skip-tag: True
+          url: http://github.intra.douban.com/coresys/pyquicklz.git
+    builders:
+      - shell: tox

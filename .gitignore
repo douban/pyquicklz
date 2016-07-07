@@ -1,3 +1,9 @@
-build/
-quicklz.c
 *.egg
+*.pyc
+*.so
+/*.egg-info/
+/.eggs/
+/.tox/
+/build/
+/quicklz.c
+/venv/
