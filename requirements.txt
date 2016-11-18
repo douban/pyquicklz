@@ -1,2 +1,1 @@
 Cython==0.24
-setuptools-cython==0.2.1

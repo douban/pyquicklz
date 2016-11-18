@@ -1,0 +1,64 @@
+language: python
+env:
+  global:
+    DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+matrix:
+  include:
+  - os: linux
+    python: 3.5
+    services: docker
+    env: TOX_ENV=py35
+         PYENV=cp35
+  - os: linux
+    python: 2.7
+    services: docker
+    env: TOX_ENV=py27
+         PYENV=cp27
+  - os: linux
+    python: pypy
+    services: docker
+    env: TOX_ENV=pypy
+         PYENV=pypy
+  - os: osx
+    language: generic
+    env: TOX_ENV=py35
+  - os: osx
+    language: generic
+    env: TOX_ENV=py27
+  - os: osx
+    language: generic
+    env: TOX_ENV=pypy
+sudo: required
+cache:
+  directories: "$HOME/.cache/pip"
+install: |
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    brew update;
+    brew install python3 PyPy;
+    pip install twine
+    virtualenv venv -p python3;
+    source venv/bin/activate;
+    pip install -U pip setuptools
+    pip install tox Cython
+  else
+    docker pull $DOCKER_IMAGE
+    pip install -U pip setuptools
+    pip install tox Cython
+  fi
+script: |
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    tox -e $TOX_ENV
+    .tox/$TOX_ENV/bin/pip wheel . -w dist
+  else
+    tox -e $TOX_ENV
+    docker run --rm -v `pwd`:/io $DOCKER_IMAGE /io/.travis/build-wheels.sh pyquicklz $PYENV
+  fi
+deploy:
+  provider: pypi
+  user: windreamer
+  password:
+    secure: EeANnstZ+FWmaqmyBQK47tRRy9/U3ZX9i6eTq+oBvg1714x5bR9H2bygs6c/O8LN/VxVismRMROIZQAGnInBEjzu5mM/lCJiObtLKEUkKrttgZQbs2wrW2K4PQHKeShuHXRW2Qf2DkQcEEpkY77Jx7O3m3YNIXox7xmSKh4shhR5W5hKpHY+7eWsTj9cr+/m3+A3CM49ljYhEFcfsLeDyZizMHjcEMb+rRma77tm2PTpKskcsA0PFBSem7Z8/h6DcxOUS/xsaMVYYyRusK2ceT/If3EfejVhyehOiQHDJTs6EvHgRRmFgFO9x7Fn4Zkm4y68DYlMvN4gSioBofHo4Ik9SrMiCx0JOAmH6Az/k31HwX0SSJ6CkJqhpkHk+lSEaLTTVosFjBzRKBW+s+WVbhtHnpwV26QeIyK7LpwDZlIYtFz3SrDGVGwJedoMLFurfX5ESj5k5+OxbS/pQUa7YDudQQC80NDtFac502Zyy9RhJY4vmLG7zQyJ3wxjyrzRKGvZkODFV3Tr5NAgCfqUwYBRPZtrG4MQD172HvUI42XaCriQgAz50CMLKyT0OT35YS1FQ6vtIp3bb+5VKS8a5J6f6nLXqftt1dLGdtf2bHDsCDYBga22lBTH82oYvkmxWBoxMvBPIHsy0YApR64yULx9YFdohXFSyXlgPtA3ulw=
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+    repo: windreamer/pyquicklz
