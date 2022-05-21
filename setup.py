@@ -3,7 +3,7 @@ import sys
 from setuptools import setup, Extension
 setup(
     name='pyquicklz',
-    version='1.4.1',
+    version='1.5.0',
     description='python binding of quicklz',
     setup_requires=['Cython >= 0.18'],
     ext_modules=[
