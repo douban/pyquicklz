@@ -1,5 +1,5 @@
 __author__    = "davies <davies.liu@gmail.com>"
-__version__   = "1.4.1"
+__version__   = "1.5.0"
 __copyright__ = "Copyright (C) 2010 douban.com"
 __license__   = "Apache License 2.0"
 
@@ -8,9 +8,7 @@ from libc.stdlib cimport malloc, free
 from cpython cimport PyBytes_AsStringAndSize, PyBytes_FromStringAndSize
 
 cdef extern from "src/quicklz.h":
-    cdef enum:
-        QLZ_SCRATCH_COMPRESS
-        QLZ_SCRATCH_DECOMPRESS
+    int qlz_get_setting(int setting) nogil
     size_t qlz_size_decompressed(char *source) nogil
     size_t qlz_size_compressed(char *source) nogil
     size_t qlz_decompress(char *source, void *destination, char *scratch_decompress) nogil
@@ -27,7 +25,7 @@ def compress(bytes val):
     PyBytes_AsStringAndSize(val, &src, &vlen)
     dst = <char *>malloc(vlen + 400)
     with nogil:
-        wbuf = <char *>malloc(QLZ_SCRATCH_COMPRESS)
+        wbuf = <char *>malloc(qlz_get_setting(1))
         csize = qlz_compress(src, dst, vlen, wbuf)
         free(wbuf)
 
@@ -36,7 +34,7 @@ def compress(bytes val):
     return val
 
 def decompress(bytes val):
-    cdef char wbuf[QLZ_SCRATCH_DECOMPRESS]
+    cdef char *wbuf
     cdef char *src
     cdef char *dst
     cdef Py_ssize_t slen, dlen
@@ -47,7 +45,9 @@ def decompress(bytes val):
         raise ValueError('compressed length not match %d!=%d' % (slen, qlz_size_compressed(src)))
     dst = <char*> malloc(qlz_size_decompressed(src))
     with nogil:
+        wbuf = <char *>malloc(qlz_get_setting(2))
         dlen = qlz_decompress(src, dst, wbuf)
+        free(wbuf)
 
     val = PyBytes_FromStringAndSize(dst, dlen);
     free(dst)
